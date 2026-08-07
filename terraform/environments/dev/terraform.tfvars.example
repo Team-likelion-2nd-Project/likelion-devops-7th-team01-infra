@@ -1,0 +1,3 @@
+aws_region   = "ap-northeast-3"                    # 오사카 리전 
+project_name = "team01-course-registration"
+owner        = "infra-team"
