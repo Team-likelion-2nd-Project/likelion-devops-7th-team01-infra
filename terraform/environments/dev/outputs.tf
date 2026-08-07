@@ -17,3 +17,8 @@ output "private_subnet_ids" {
   description = "프라이빗 서브넷 ID 목록"
   value       = module.vpc.private_subnet_ids
 }
+
+output "ecr_repository_url" {
+  description = "Backend ECR 리포지토리 URL"
+  value       = module.ecr.repository_url
+}

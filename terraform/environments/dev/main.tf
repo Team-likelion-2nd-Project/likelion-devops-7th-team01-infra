@@ -20,3 +20,11 @@ module "vpc" {
   project_name = var.project_name           # 이 환경(dev)의 variables.tf에 이미 정의된 값 재사용
   owner        = var.owner
 }
+
+module "ecr" {
+  source = "../../modules/ecr"
+
+  project_name = var.project_name
+  owner        = var.owner
+  env          = "dev"          # variables.tf에 env 변수가 없으니 직접 값 지정
+}
