@@ -10,5 +10,13 @@ terraform {
 }
 
 provider "aws" {
-  region = var.aws_region               # 리전은 하드코딩 안 하고 변수로 받음
+  region = var.aws_region               # 리전은 하드코딩 안 하고 변수로 받음 (오사카로 값 넣을 예정)
+}
+
+module "vpc" {
+  source = "../../modules/vpc"            # vpc 모듈 코드가 있는 경로 (상대경로)
+
+  vpc_cidr     = "10.0.0.0/16"             # vpc 모듈의 variables.tf에서 받는 값 전달
+  project_name = var.project_name           # 이 환경(dev)의 variables.tf에 이미 정의된 값 재사용
+  owner        = var.owner
 }
