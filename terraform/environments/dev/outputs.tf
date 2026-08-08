@@ -29,3 +29,7 @@ output "rds_sg_id" {
 output "redis_sg_id" {
   value = module.security_group.redis_sg_id
 }
+
+output "alb_sg_id" {
+  value = module.security_group.alb_sg_id
+}

@@ -13,3 +13,7 @@ output "redis_sg_id" {
   value       = aws_security_group.redis.id
 }
 
+output "alb_sg_id" {
+  description = "ALB용 보안그룹 ID"
+  value       = aws_security_group.alb.id
+}
