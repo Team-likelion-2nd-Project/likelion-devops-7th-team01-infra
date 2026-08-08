@@ -20,3 +20,13 @@ module "vpc" {
   project_name = var.project_name           # 이 환경(dev)의 variables.tf에 이미 정의된 값 재사용
   owner        = var.owner
 }
+
+module "security_group" {
+  source = "../../modules/security-group"
+
+  vpc_id       = module.vpc.vpc_id      # vpc 모듈의 output을 그대로 가져다 씀
+  vpc_cidr     = "10.0.0.0/16"           # VPC 모듈 만들 때 썼던 것과 동일한 값
+  project_name = var.project_name
+  owner        = var.owner
+  env          = "dev"
+}
