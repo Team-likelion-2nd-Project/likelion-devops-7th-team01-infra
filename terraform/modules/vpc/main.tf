@@ -6,7 +6,8 @@ resource "aws_vpc" "main" {
   tags = {
     Name    = "${var.project_name}-vpc"      # 리소스 이름 태그 (콘솔에서 구분용)
     Project = var.project_name                # 프로젝트 태그 (계획서 6번 규칙)
-    Owner   = var.owner                        # 소유자 태그
+    Owner   = var.owner    
+    Env     = var.env                    
   }
 }
 
@@ -26,6 +27,7 @@ resource "aws_subnet" "public" {
     Name    = "${var.project_name}-public-${each.key}"
     Project = var.project_name
     Owner   = var.owner
+    Env     = var.env
   }
 }
 
@@ -45,6 +47,7 @@ resource "aws_subnet" "private" {
     Name    = "${var.project_name}-private-${each.key}"
     Project = var.project_name
     Owner   = var.owner
+    Env     = var.env
   }
 }
 
@@ -56,6 +59,7 @@ resource "aws_internet_gateway" "main" {
     Name    = "${var.project_name}-igw"
     Project = var.project_name
     Owner   = var.owner
+    Env     = var.env
   }
 }
 
@@ -72,6 +76,7 @@ resource "aws_route_table" "public" {
     Name    = "${var.project_name}-public-rt"
     Project = var.project_name
     Owner   = var.owner
+    Env     = var.env
   }
 }
 
@@ -108,6 +113,7 @@ resource "aws_security_group" "nat" {
     Name    = "${var.project_name}-nat-sg"
     Project = var.project_name
     Owner   = var.owner
+    Env     = var.env
   }
 }
 
@@ -135,6 +141,7 @@ resource "aws_instance" "nat" {
     Name    = "${var.project_name}-nat-instance"
     Project = var.project_name
     Owner   = var.owner
+    Env     = var.env
   }
 }
 
@@ -151,6 +158,7 @@ resource "aws_route_table" "private" {
     Name    = "${var.project_name}-private-rt"
     Project = var.project_name
     Owner   = var.owner
+    Env     = var.env
   }
 }
 

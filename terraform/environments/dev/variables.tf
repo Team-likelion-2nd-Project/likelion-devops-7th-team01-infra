@@ -15,3 +15,8 @@ variable "owner" {
   type        = string
   default     = "infra-team"
 }
+
+variable "alert_email" {
+  description = "비용 알림을 받을 이메일 주소"
+  type        = string
+}
