@@ -1,24 +1,29 @@
 terraform {
-  required_version = ">= 1.5.0"        # 팀원들이 다른 terraform 버전 써도 최소 버전은 맞추게 강제
-
+  required_version = ">= 1.5.0"
   required_providers {
     aws = {
-      source  = "hashicorp/aws"        # AWS 리소스를 다루기 위한 공식 provider 사용 선언
-      version = "~> 5.0"                # 5.x 버전대 사용 (호환성 문제 방지)
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
     }
   }
 }
 
 provider "aws" {
-  region = var.aws_region               # 리전은 하드코딩 안 하고 변수로 받음 (오사카로 값 넣을 예정)
+  region = var.aws_region
+}
+
+provider "aws" {
+  alias  = "us_east_1"
+  region = "us-east-1"
 }
 
 module "vpc" {
-  source = "../../modules/vpc"            # vpc 모듈 코드가 있는 경로 (상대경로)
+  source = "../../modules/vpc"
 
-  vpc_cidr     = "10.0.0.0/16"             # vpc 모듈의 variables.tf에서 받는 값 전달
-  project_name = var.project_name           # 이 환경(dev)의 variables.tf에 이미 정의된 값 재사용
+  vpc_cidr     = "10.0.0.0/16"
+  project_name = var.project_name
   owner        = var.owner
+  env          = "dev"
 }
 
 module "ecr" {
@@ -26,5 +31,37 @@ module "ecr" {
 
   project_name = var.project_name
   owner        = var.owner
-  env          = "dev"          # variables.tf에 env 변수가 없으니 직접 값 지정
+  env          = "dev"
+}
+
+module "security_group" {
+  source = "../../modules/security-group"
+
+  vpc_id       = module.vpc.vpc_id
+  vpc_cidr     = "10.0.0.0/16"
+  project_name = var.project_name
+  owner        = var.owner
+  env          = "dev"
+}
+
+module "iam" {
+  source = "../../modules/iam"
+
+  project_name = var.project_name
+  owner        = var.owner
+  env          = "dev"
+}
+
+module "billing_alarm" {
+  source = "../../modules/billing-alarm"
+
+  providers = {
+    aws.us_east_1 = aws.us_east_1
+  }
+
+  project_name      = var.project_name
+  owner             = var.owner
+  env               = "dev"
+  alert_email       = var.alert_email
+  billing_threshold = 60
 }

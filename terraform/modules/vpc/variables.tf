@@ -13,3 +13,8 @@ variable "owner" {
   description = "리소스 소유자 (태깅용)"
   type        = string
 }
+
+variable "env" {
+  description = "환경 구분 (태깅용)"
+  type        = string
+}
