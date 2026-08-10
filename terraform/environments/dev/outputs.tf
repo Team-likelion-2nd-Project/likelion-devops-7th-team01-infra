@@ -17,3 +17,19 @@ output "private_subnet_ids" {
   description = "프라이빗 서브넷 ID 목록"
   value       = module.vpc.private_subnet_ids
 }
+
+output "eks_nodes_sg_id" {
+  value = module.security_group.eks_nodes_sg_id
+}
+
+output "rds_sg_id" {
+  value = module.security_group.rds_sg_id
+}
+
+output "redis_sg_id" {
+  value = module.security_group.redis_sg_id
+}
+
+output "alb_sg_id" {
+  value = module.security_group.alb_sg_id
+}
