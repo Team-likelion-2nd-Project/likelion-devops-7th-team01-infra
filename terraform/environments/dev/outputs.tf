@@ -69,3 +69,13 @@ output "rds_master_user_secret_arn" {
   description = "RDS 마스터 계정 Secrets Manager ARN"
   value       = module.rds.master_user_secret_arn
 }
+
+output "redis_endpoint" {
+  description = "Redis 엔드포인트"
+  value       = module.elasticache.redis_endpoint
+}
+
+output "redis_port" {
+  description = "Redis 포트"
+  value       = module.elasticache.redis_port
+}

@@ -76,3 +76,14 @@ module "rds" {
   private_subnet_ids = module.vpc.private_subnet_ids
   rds_sg_id           = module.security_group.rds_sg_id
 }
+
+module "elasticache" {
+  source = "../../modules/elasticache"
+
+  project_name = var.project_name
+  owner        = var.owner
+  env          = "dev"
+
+  private_subnet_ids = module.vpc.private_subnet_ids
+  redis_sg_id         = module.security_group.redis_sg_id
+}
