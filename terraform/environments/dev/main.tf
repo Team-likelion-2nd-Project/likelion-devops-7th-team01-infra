@@ -87,3 +87,14 @@ module "elasticache" {
   private_subnet_ids = module.vpc.private_subnet_ids
   redis_sg_id         = module.security_group.redis_sg_id
 }
+
+module "github_oidc" {
+  source = "../../modules/github-oidc"
+
+  project_name = var.project_name
+  owner        = var.owner
+  env          = "dev"
+
+  ecr_repository_arn = module.ecr.repository_arn
+  eks_cluster_arn    = "arn:aws:eks:ap-northeast-3:834922934330:cluster/team01-course-registration-eks"
+}

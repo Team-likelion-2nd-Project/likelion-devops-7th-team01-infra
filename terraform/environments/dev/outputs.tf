@@ -79,3 +79,8 @@ output "redis_port" {
   description = "Redis 포트"
   value       = module.elasticache.redis_port
 }
+
+output "github_actions_role_arn" {
+  description = "GitHub Actions가 assume할 IAM Role ARN"
+  value       = module.github_oidc.github_actions_role_arn
+}
