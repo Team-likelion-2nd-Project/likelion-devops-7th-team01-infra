@@ -1,32 +1,48 @@
-terraform {
-  required_version = ">= 1.5.0"        # 팀원들이 다른 terraform 버전 써도 최소 버전은 맞추게 강제
-
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"        # AWS 리소스를 다루기 위한 공식 provider 사용 선언
-      version = "~> 5.0"                # 5.x 버전대 사용 (호환성 문제 방지)
-    }
-  }
+output "aws_region" {
+  description = "사용 중인 AWS 리전"      # 나중에 다른 모듈이나 팀원이 확인할 때 참고용
+  value       = var.aws_region
 }
 
-provider "aws" {
-  region = var.aws_region               # 리전은 하드코딩 안 하고 변수로 받음 (오사카로 값 넣을 예정)
+output "vpc_id" {
+  description = "생성된 VPC ID"
+  value       = module.vpc.vpc_id
 }
 
-module "vpc" {
-  source = "../../modules/vpc"            # vpc 모듈 코드가 있는 경로 (상대경로)
-
-  vpc_cidr     = "10.0.0.0/16"             # vpc 모듈의 variables.tf에서 받는 값 전달
-  project_name = var.project_name           # 이 환경(dev)의 variables.tf에 이미 정의된 값 재사용
-  owner        = var.owner
+output "public_subnet_ids" {
+  description = "퍼블릭 서브넷 ID 목록"
+  value       = module.vpc.public_subnet_ids
 }
 
-module "security_group" {
-  source = "../../modules/security-group"
+output "private_subnet_ids" {
+  description = "프라이빗 서브넷 ID 목록"
+  value       = module.vpc.private_subnet_ids
+}
 
-  vpc_id       = module.vpc.vpc_id      # vpc 모듈의 output을 그대로 가져다 씀
-  vpc_cidr     = "10.0.0.0/16"           # VPC 모듈 만들 때 썼던 것과 동일한 값
-  project_name = var.project_name
-  owner        = var.owner
-  env          = "dev"
+output "ecr_repository_url" {
+  description = "Backend ECR 리포지토리 URL"
+  value       = module.ecr.repository_url
+}
+
+output "eks_nodes_sg_id" {
+  value = module.security_group.eks_nodes_sg_id
+}
+
+output "rds_sg_id" {
+  value = module.security_group.rds_sg_id
+}
+
+output "redis_sg_id" {
+  value = module.security_group.redis_sg_id
+}
+
+output "alb_sg_id" {
+  value = module.security_group.alb_sg_id
+}
+
+output "eks_cluster_role_arn" {
+  value = module.iam.eks_cluster_role_arn
+}
+
+output "eks_node_group_role_arn" {
+  value = module.iam.eks_node_group_role_arn
 }
