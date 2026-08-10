@@ -95,5 +95,6 @@ module "eks" {
   owner        = var.owner
   env          = "dev"
 
-  private_subnet_ids = module.vpc.private_subnet_ids
+  private_subnet_ids  = module.vpc.private_subnet_ids
+  node_group_role_arn = module.iam.eks_node_group_role_arn
 }
