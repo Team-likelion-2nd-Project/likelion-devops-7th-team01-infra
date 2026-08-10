@@ -65,3 +65,14 @@ module "billing_alarm" {
   alert_email       = var.alert_email
   billing_threshold = 60
 }
+
+module "rds" {
+  source = "../../modules/rds"
+
+  project_name = var.project_name
+  owner        = var.owner
+  env          = "dev"
+
+  private_subnet_ids = module.vpc.private_subnet_ids
+  rds_sg_id           = module.security_group.rds_sg_id
+}

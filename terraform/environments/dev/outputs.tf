@@ -54,3 +54,18 @@ output "billing_alarm_sns_topic_arn" {
 output "billing_alarm_name" {
   value = module.billing_alarm.alarm_name
 }
+
+output "rds_endpoint" {
+  description = "RDS 엔드포인트"
+  value       = module.rds.db_endpoint
+}
+
+output "rds_db_name" {
+  description = "RDS 데이터베이스 이름"
+  value       = module.rds.db_name
+}
+
+output "rds_master_user_secret_arn" {
+  description = "RDS 마스터 계정 Secrets Manager ARN"
+  value       = module.rds.master_user_secret_arn
+}
