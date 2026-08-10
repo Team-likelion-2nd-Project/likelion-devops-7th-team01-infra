@@ -1,6 +1,5 @@
 terraform {
   required_version = ">= 1.5.0"
-
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -22,6 +21,32 @@ module "vpc" {
   source = "../../modules/vpc"
 
   vpc_cidr     = "10.0.0.0/16"
+  project_name = var.project_name
+  owner        = var.owner
+  env          = "dev"
+}
+
+module "ecr" {
+  source = "../../modules/ecr"
+
+  project_name = var.project_name
+  owner        = var.owner
+  env          = "dev"
+}
+
+module "security_group" {
+  source = "../../modules/security-group"
+
+  vpc_id       = module.vpc.vpc_id
+  vpc_cidr     = "10.0.0.0/16"
+  project_name = var.project_name
+  owner        = var.owner
+  env          = "dev"
+}
+
+module "iam" {
+  source = "../../modules/iam"
+
   project_name = var.project_name
   owner        = var.owner
   env          = "dev"
