@@ -28,7 +28,6 @@ resource "aws_iam_role_policy_attachment" "cluster_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
 }
 
-# EKS 클러스터
 resource "aws_eks_cluster" "main" {
   name     = "team01-course-registration-eks"
   role_arn = aws_iam_role.cluster.arn
@@ -40,6 +39,10 @@ resource "aws_eks_cluster" "main" {
     subnet_ids              = var.private_subnet_ids
     endpoint_public_access  = true
     endpoint_private_access = false
+  }
+
+  zonal_shift_config {
+    enabled = false
   }
 
   depends_on = [aws_iam_role_policy_attachment.cluster_policy]
