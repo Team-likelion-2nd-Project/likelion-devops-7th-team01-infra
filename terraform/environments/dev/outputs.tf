@@ -80,18 +80,26 @@ output "redis_port" {
   value       = module.elasticache.redis_port
 }
 
+output "github_actions_role_arn" {
+  description = "Backend GitHub Actions가 assume할 IAM Role ARN"
+  value       = module.github_oidc.github_actions_role_arn
+}
+
 output "eks_cluster_name" {
   description = "EKS 클러스터 이름"
   value       = module.eks.cluster_name
 }
+
 output "eks_cluster_endpoint" {
   description = "EKS 클러스터 엔드포인트"
   value       = module.eks.cluster_endpoint
 }
+
 output "eks_cluster_role_arn_new" {
   description = "EKS 클러스터 IAM Role ARN (신규, team01-eks-cluster-role)"
   value       = module.eks.cluster_role_arn
 }
+
 output "eks_oidc_issuer_url" {
   description = "EKS OIDC issuer URL"
   value       = module.eks.cluster_oidc_issuer_url
@@ -101,6 +109,7 @@ output "cognito_user_pool_id" {
   description = "Cognito User Pool ID"
   value       = module.cognito.user_pool_id
 }
+
 output "cognito_user_pool_client_id" {
   description = "Cognito App Client ID"
   value       = module.cognito.user_pool_client_id
