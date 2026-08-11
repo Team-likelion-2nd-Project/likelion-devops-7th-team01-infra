@@ -87,3 +87,14 @@ module "elasticache" {
   private_subnet_ids = module.vpc.private_subnet_ids
   redis_sg_id         = module.security_group.redis_sg_id
 }
+
+module "eks" {
+  source = "../../modules/eks"
+
+  project_name = var.project_name
+  owner        = var.owner
+  env          = "dev"
+
+  private_subnet_ids  = module.vpc.private_subnet_ids
+  node_group_role_arn = module.iam.eks_node_group_role_arn
+}
