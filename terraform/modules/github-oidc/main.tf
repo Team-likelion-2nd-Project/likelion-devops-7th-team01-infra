@@ -1,15 +1,10 @@
 # GitHub Actions OIDC Identity Provider
 resource "aws_iam_openid_connect_provider" "github" {
-  url = "https://token.actions.githubusercontent.com"
+  count = var.create_oidc_provider ? 1 : 0
 
-  client_id_list = [
-    "sts.amazonaws.com"
-  ]
-
-  # GitHub Actions OIDC의 공식 thumbprint (GitHub이 공개한 고정 값)
-  thumbprint_list = [
-    "6938fd4d98bab03faadb97b34396831e3780aea1"
-  ]
+  url             = "https://token.actions.githubusercontent.com"
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = ["6938fd4d98bab03faadb97b34396831e3780aea1"]
 
   tags = {
     Name    = "${var.project_name}-github-oidc"
@@ -17,6 +12,10 @@ resource "aws_iam_openid_connect_provider" "github" {
     Owner   = var.owner
     Env     = var.env
   }
+}
+
+locals {
+  oidc_provider_arn = var.create_oidc_provider ? aws_iam_openid_connect_provider.github[0].arn : var.existing_oidc_provider_arn
 }
 
 # Backend 배포용 IAM Role — GitHub Actions에서 assume
@@ -29,7 +28,7 @@ resource "aws_iam_role" "github_actions_backend" {
       {
         Effect = "Allow"
         Principal = {
-          Federated = aws_iam_openid_connect_provider.github.arn
+          Federated = local.oidc_provider_arn
         }
         Action = "sts:AssumeRoleWithWebIdentity"
         Condition = {
@@ -84,7 +83,7 @@ resource "aws_iam_role_policy" "ecr_push" {
   })
 }
 
-# EKS 배포 권한 (kubectl 접근용 — 클러스터 describe + Access Entry는 별도)
+# EKS 배포 권한
 resource "aws_iam_role_policy" "eks_deploy" {
   name = "${var.project_name}-eks-deploy-policy"
   role = aws_iam_role.github_actions_backend.id
@@ -99,6 +98,68 @@ resource "aws_iam_role_policy" "eks_deploy" {
           "eks:ListClusters"
         ]
         Resource = var.eks_cluster_arn
+      }
+    ]
+  })
+}
+
+# Frontend 배포용 IAM Role — GitHub Actions에서 assume
+resource "aws_iam_role" "github_actions_frontend" {
+  name = "team01-frontend-cicd-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Federated = local.oidc_provider_arn
+        }
+        Action = "sts:AssumeRoleWithWebIdentity"
+        Condition = {
+          StringEquals = {
+            "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
+          }
+          StringLike = {
+            "token.actions.githubusercontent.com:sub" = [
+              "repo:${var.github_org}@*/${var.github_repo}@*:ref:refs/heads/develop",
+              "repo:${var.github_org}@*/${var.github_repo}@*:ref:refs/heads/main"
+            ]
+          }
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "frontend_deploy" {
+  name = "frontend-s3-cloudfront-deploy"
+  role = aws_iam_role.github_actions_frontend.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "S3Deploy"
+        Effect = "Allow"
+        Action = [
+          "s3:PutObject",
+          "s3:GetObject",
+          "s3:ListBucket",
+          "s3:DeleteObject"
+        ]
+        Resource = [
+          var.s3_bucket_arn,
+          "${var.s3_bucket_arn}/*"
+        ]
+      },
+      {
+        Sid    = "CloudFrontInvalidate"
+        Effect = "Allow"
+        Action = [
+          "cloudfront:CreateInvalidation"
+        ]
+        Resource = var.cloudfront_distribution_arn
       }
     ]
   })

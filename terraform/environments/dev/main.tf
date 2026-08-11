@@ -88,6 +88,29 @@ module "elasticache" {
   redis_sg_id         = module.security_group.redis_sg_id
 }
 
+module "eks" {
+  source = "../../modules/eks"
+  project_name = var.project_name
+  owner        = var.owner
+  env          = "dev"
+  private_subnet_ids  = module.vpc.private_subnet_ids
+  node_group_role_arn = module.iam.eks_node_group_role_arn
+}
+
+module "cognito" {
+  source = "../../modules/cognito"
+  project_name = var.project_name
+  owner        = var.owner
+  env          = "dev"
+}
+
+module "frontend_hosting" {
+  source = "../../modules/frontend-hosting"
+  project_name = var.project_name
+  owner        = var.owner
+  env          = "dev"
+}
+
 module "github_oidc" {
   source = "../../modules/github-oidc"
 
@@ -95,6 +118,17 @@ module "github_oidc" {
   owner        = var.owner
   env          = "dev"
 
+  create_oidc_provider       = false
+  existing_oidc_provider_arn = "arn:aws:iam::834922934330:oidc-provider/token.actions.githubusercontent.com"
+
+  github_org   = "Team-likelion-2nd-Project"
+  backend_repo = "likelion-devops-7th-team01-backend"
+  github_repo  = "likelion-devops-7th-team01-frontend"
+  deploy_branch = "main"
+
   ecr_repository_arn = module.ecr.repository_arn
   eks_cluster_arn    = "arn:aws:eks:ap-northeast-3:834922934330:cluster/team01-course-registration-eks"
+
+  s3_bucket_arn               = module.frontend_hosting.s3_bucket_arn
+  cloudfront_distribution_arn = module.frontend_hosting.cloudfront_distribution_arn
 }
