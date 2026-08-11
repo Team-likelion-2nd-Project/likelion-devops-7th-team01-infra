@@ -105,3 +105,19 @@ output "cognito_user_pool_client_id" {
   description = "Cognito App Client ID"
   value       = module.cognito.user_pool_client_id
 }
+
+output "frontend_bucket_name" {
+  value = module.frontend_hosting.s3_bucket_name
+}
+
+output "frontend_cloudfront_id" {
+  value = module.frontend_hosting.cloudfront_distribution_id
+}
+
+output "frontend_cicd_role_arn" {
+  value = module.github_oidc.role_arn
+}
+
+output "frontend_cloudfront_domain" {
+  value = module.frontend_hosting.cloudfront_domain_name
+}
