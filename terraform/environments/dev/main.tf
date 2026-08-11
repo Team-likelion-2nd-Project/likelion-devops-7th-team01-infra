@@ -103,3 +103,24 @@ module "cognito" {
   owner        = var.owner
   env          = "dev"
 }
+
+module "frontend_hosting" {
+  source = "../../modules/frontend-hosting"
+
+  project_name = var.project_name
+  owner        = var.owner
+  env          = "dev"
+}
+
+module "github_oidc" {
+  source = "../../modules/github-oidc"
+
+  create_oidc_provider       = false
+  existing_oidc_provider_arn = "arn:aws:iam::834922934330:oidc-provider/token.actions.githubusercontent.com"
+
+  github_org  = "Team-likelion-2nd-Project"
+  github_repo = "likelion-devops-7th-team01-frontend"
+
+  s3_bucket_arn                = module.frontend_hosting.s3_bucket_arn
+  cloudfront_distribution_arn  = module.frontend_hosting.cloudfront_distribution_arn
+}
