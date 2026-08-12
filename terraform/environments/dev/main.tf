@@ -5,6 +5,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.30"
+    }
   }
 }
 
@@ -15,6 +19,17 @@ provider "aws" {
 provider "aws" {
   alias  = "us_east_1"
   region = "us-east-1"
+}
+
+provider "kubernetes" {
+  host                   = module.eks.cluster_endpoint
+  cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+
+  exec {
+    api_version = "client.authentication.k8s.io/v1beta1"
+    command     = "aws"
+    args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_name, "--region", "ap-northeast-3"]
+  }
 }
 
 module "vpc" {
@@ -152,4 +167,25 @@ module "cluster_autoscaler" {
   env          = "dev"
 
   cluster_name = module.eks.cluster_name
+}
+
+resource "kubernetes_secret" "backend_rds" {
+  metadata {
+    name      = "backend-rds-secret"
+    namespace = "default"
+  }
+
+  data = {
+    DB_HOST     = split(":", module.rds.db_endpoint)[0]
+    DB_PORT     = "3306"
+    DB_NAME     = module.rds.db_name
+    DB_USERNAME = "admin"
+    DB_PASSWORD = jsondecode(data.aws_secretsmanager_secret_version.rds_master.secret_string)["password"]
+  }
+
+  type = "Opaque"
+}
+
+data "aws_secretsmanager_secret_version" "rds_master" {
+  secret_id = module.rds.master_user_secret_arn
 }
