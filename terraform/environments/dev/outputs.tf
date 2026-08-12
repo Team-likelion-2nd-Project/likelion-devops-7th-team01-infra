@@ -129,3 +129,8 @@ output "frontend_cloudfront_domain" {
 output "backend_cicd_role_arn" {
   value = module.github_oidc.backend_role_arn
 }
+
+output "cluster_autoscaler_role_arn" {
+  description = "Cluster Autoscaler IAM Role ARN"
+  value       = module.cluster_autoscaler.role_arn
+}

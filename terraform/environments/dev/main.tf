@@ -143,3 +143,13 @@ resource "aws_eks_access_policy_association" "backend_cicd" {
     type = "cluster"
   }
 }
+
+module "cluster_autoscaler" {
+  source = "../../modules/cluster-autoscaler"
+
+  project_name = var.project_name
+  owner        = var.owner
+  env          = "dev"
+
+  cluster_name = module.eks.cluster_name
+}
