@@ -1,0 +1,34 @@
+# metrics-server Service selector 수정
+# 
+# 배경: EKS가 클러스터 생성 시 자동 설치하는 metrics-server(EKS addon)의 
+# Service selector에 k8s-app 라벨이 포함돼있는데, 실제 파드에는 이 라벨이 
+# 없어서 endpoint 매칭 실패(MissingEndpoints) 발생. kubectl top 명령어가 
+# "Metrics API not available" 에러를 냄.
+#
+# 적용 방법:
+#   kubectl patch svc metrics-server -n kube-system --type='json' \
+#     -p='[{"op": "remove", "path": "/spec/selector/k8s-app"}]'
+#
+# 또는 이 파일로 재적용:
+#   kubectl apply -f k8s/fixes/metrics-server-service-fix.yaml
+#
+# 발견일: 2026-08-12, 클러스터 재생성 시 동일 문제 재발 가능성 있음
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: metrics-server
+  namespace: kube-system
+  labels:
+    app.kubernetes.io/instance: metrics-server
+    app.kubernetes.io/name: metrics-server
+spec:
+  selector:
+    app.kubernetes.io/instance: metrics-server
+    app.kubernetes.io/name: metrics-server
+  ports:
+  - appProtocol: https
+    name: https
+    port: 443
+    protocol: TCP
+    targetPort: https
