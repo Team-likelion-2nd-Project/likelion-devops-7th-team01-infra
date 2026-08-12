@@ -106,6 +106,7 @@ module "cognito" {
 
 module "frontend_hosting" {
   source = "../../modules/frontend-hosting"
+
   project_name = var.project_name
   owner        = var.owner
   env          = "dev"
@@ -114,21 +115,31 @@ module "frontend_hosting" {
 module "github_oidc" {
   source = "../../modules/github-oidc"
 
-  project_name = var.project_name
-  owner        = var.owner
-  env          = "dev"
-
   create_oidc_provider       = false
   existing_oidc_provider_arn = "arn:aws:iam::834922934330:oidc-provider/token.actions.githubusercontent.com"
 
-  github_org   = "Team-likelion-2nd-Project"
-  backend_repo = "likelion-devops-7th-team01-backend"
-  github_repo  = "likelion-devops-7th-team01-frontend"
-  deploy_branch = "main"
+  github_org  = "Team-likelion-2nd-Project"
+  github_repo = "likelion-devops-7th-team01-frontend"
 
-  ecr_repository_arn = module.ecr.repository_arn
-  eks_cluster_arn    = "arn:aws:eks:ap-northeast-3:834922934330:cluster/team01-course-registration-eks"
+  s3_bucket_arn                = module.frontend_hosting.s3_bucket_arn
+  cloudfront_distribution_arn  = module.frontend_hosting.cloudfront_distribution_arn
 
-  s3_bucket_arn               = module.frontend_hosting.s3_bucket_arn
-  cloudfront_distribution_arn = module.frontend_hosting.cloudfront_distribution_arn
+  github_backend_repo = "likelion-devops-7th-team01-backend"
+  ecr_repository_arn  = module.ecr.repository_arn
+  eks_cluster_arn     = module.eks.cluster_arn
+}
+
+resource "aws_eks_access_entry" "backend_cicd" {
+  cluster_name  = module.eks.cluster_name
+  principal_arn = module.github_oidc.backend_role_arn
+}
+
+resource "aws_eks_access_policy_association" "backend_cicd" {
+  cluster_name  = module.eks.cluster_name
+  principal_arn = module.github_oidc.backend_role_arn
+  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSEditPolicy"
+
+  access_scope {
+    type = "cluster"
+  }
 }
