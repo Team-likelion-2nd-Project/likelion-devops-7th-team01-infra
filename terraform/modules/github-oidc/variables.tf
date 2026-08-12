@@ -23,3 +23,15 @@ variable "s3_bucket_arn" {
 variable "cloudfront_distribution_arn" {
   type = string
 }
+
+variable "github_backend_repo" {
+  type = string
+}
+
+variable "ecr_repository_arn" {
+  type = string
+}
+
+variable "eks_cluster_arn" {
+  type = string
+}

@@ -123,4 +123,23 @@ module "github_oidc" {
 
   s3_bucket_arn                = module.frontend_hosting.s3_bucket_arn
   cloudfront_distribution_arn  = module.frontend_hosting.cloudfront_distribution_arn
+
+  github_backend_repo = "likelion-devops-7th-team01-backend"
+  ecr_repository_arn  = module.ecr.repository_arn
+  eks_cluster_arn     = module.eks.cluster_arn
+}
+
+resource "aws_eks_access_entry" "backend_cicd" {
+  cluster_name  = module.eks.cluster_name
+  principal_arn = module.github_oidc.backend_role_arn
+}
+
+resource "aws_eks_access_policy_association" "backend_cicd" {
+  cluster_name  = module.eks.cluster_name
+  principal_arn = module.github_oidc.backend_role_arn
+  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSEditPolicy"
+
+  access_scope {
+    type = "cluster"
+  }
 }

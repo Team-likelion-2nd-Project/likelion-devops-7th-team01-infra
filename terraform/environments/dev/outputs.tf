@@ -121,3 +121,7 @@ output "frontend_cicd_role_arn" {
 output "frontend_cloudfront_domain" {
   value = module.frontend_hosting.cloudfront_domain_name
 }
+
+output "backend_cicd_role_arn" {
+  value = module.github_oidc.backend_role_arn
+}
