@@ -80,11 +80,6 @@ output "redis_port" {
   value       = module.elasticache.redis_port
 }
 
-output "github_actions_role_arn" {
-  description = "Backend GitHub Actions가 assume할 IAM Role ARN"
-  value       = module.github_oidc.github_actions_role_arn
-}
-
 output "eks_cluster_name" {
   description = "EKS 클러스터 이름"
   value       = module.eks.cluster_name
