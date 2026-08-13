@@ -224,3 +224,12 @@ module "alb_controller" {
   env          = "dev"
   cluster_name = module.eks.cluster_name
 }
+
+module "ebs_csi" {
+  source = "../../modules/ebs-csi-driver"
+
+  project_name = var.project_name
+  owner        = var.owner
+  env          = "dev"
+  cluster_name = module.eks.cluster_name
+}
