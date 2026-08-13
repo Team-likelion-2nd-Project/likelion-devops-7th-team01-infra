@@ -215,3 +215,12 @@ resource "aws_security_group_rule" "cluster_sg_from_nodes" {
   source_security_group_id = module.security_group.eks_nodes_sg_id
   description               = "Allow nodes to reach EKS control plane API"
 }
+
+module "alb_controller" {
+  source = "../../modules/alb-controller"
+
+  project_name = var.project_name
+  owner        = var.owner
+  env          = "dev"
+  cluster_name = module.eks.cluster_name
+}
