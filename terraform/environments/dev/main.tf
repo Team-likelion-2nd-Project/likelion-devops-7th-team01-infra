@@ -190,12 +190,12 @@ data "aws_secretsmanager_secret_version" "rds_master" {
   secret_id = module.rds.master_user_secret_arn
 }
 
-module "backend_secrets" {
-  source = "../../modules/backend-secrets"
-
-  project_name   = var.project_name
-  owner          = var.owner
-  env            = "dev"
-  cluster_name   = module.eks.cluster_name
-  rds_secret_arn = module.rds.master_user_secret_arn
+resource "aws_security_group_rule" "rds_from_eks_cluster_sg" { 
+  type                     = "ingress"
+  from_port                = 3306
+  to_port                  = 3306
+  protocol                 = "tcp"
+  security_group_id        = module.security_group.rds_sg_id
+  source_security_group_id = "sg-08535928bf04e73ad"
+  description               = "Allow MySQL from actual EKS cluster security group"
 }
