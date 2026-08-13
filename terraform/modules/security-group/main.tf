@@ -1,14 +1,18 @@
+data "aws_eks_cluster" "main" {
+  name = "${var.project_name}-eks"
+}
+
 # EKS 워커노드용 보안그룹
 resource "aws_security_group" "eks_nodes" {
   name_prefix = "${var.project_name}-eks-nodes-"
-  vpc_id      = var.vpc_id                          # VPC 모듈에서 만든 VPC ID를 전달받아 사용
+  vpc_id      = var.vpc_id
 
   ingress {
-  description     = "Allow HTTP from ALB"
-  from_port       = 80
-  to_port         = 80
-  protocol        = "tcp"
-  security_groups = [aws_security_group.alb.id]
+    description     = "Allow HTTP from ALB"
+    from_port       = 80
+    to_port         = 80
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb.id]
   }
 
   ingress {
@@ -17,6 +21,22 @@ resource "aws_security_group" "eks_nodes" {
     to_port     = 0
     protocol    = "-1"
     self        = true
+  }
+
+  ingress {
+    description     = "Allow control plane to communicate with worker kubelets"
+    from_port       = 10250
+    to_port         = 10250
+    protocol        = "tcp"
+    security_groups = [data.aws_eks_cluster.main.vpc_config[0].cluster_security_group_id]
+  }
+
+  ingress {
+    description     = "Allow control plane HTTPS traffic to nodes"
+    from_port       = 443
+    to_port         = 443
+    protocol        = "tcp"
+    security_groups = [data.aws_eks_cluster.main.vpc_config[0].cluster_security_group_id]
   }
 
   egress {
@@ -45,7 +65,7 @@ resource "aws_security_group" "rds" {
     from_port       = 3306
     to_port         = 3306
     protocol        = "tcp"
-    security_groups = [aws_security_group.eks_nodes.id]   # EKS 보안그룹에서 오는 트래픽만 허용 (계획서 원칙 그대로)
+    security_groups = [aws_security_group.eks_nodes.id]
   }
 
   egress {
@@ -74,7 +94,7 @@ resource "aws_security_group" "redis" {
     from_port       = 6379
     to_port         = 6379
     protocol        = "tcp"
-    security_groups = [aws_security_group.eks_nodes.id]   # RDS와 마찬가지로 EKS 보안그룹에서만 허용
+    security_groups = [aws_security_group.eks_nodes.id]
   }
 
   egress {

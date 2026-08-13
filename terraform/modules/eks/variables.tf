@@ -22,3 +22,8 @@ variable "node_group_role_arn" {
   description = "노드그룹에 사용할 IAM Role ARN (M1-5에서 만든 기존 Role 재사용)"
   type        = string
 }
+
+variable "eks_nodes_sg_id" {
+  description = "EKS 노드에 붙일 보안그룹 ID"
+  type        = string
+}
