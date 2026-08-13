@@ -16,6 +16,19 @@ resource "aws_cognito_user_pool" "main" {
     require_uppercase = false
   }
 
+  schema {
+    name                     = "studentNo"
+    attribute_data_type      = "String"
+    mutable                  = true
+    required                 = false
+    developer_only_attribute = false
+
+    string_attribute_constraints {
+      min_length = 1
+      max_length = 20
+    }
+  }
+
   tags = {
     Name    = "${var.project_name}-user-pool"
     Project = var.project_name
