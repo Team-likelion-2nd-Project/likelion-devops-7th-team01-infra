@@ -64,9 +64,31 @@ resource "aws_eks_node_group" "main" {
     max_size     = 3
   }
 
+  launch_template {
+    id      = aws_launch_template.node.id
+    version = aws_launch_template.node.latest_version
+  }
+
   tags = {
     Project = var.project_name
     Owner   = var.owner
     Env     = var.env
+  }
+}
+
+# 노드가 eks_nodes 보안그룹을 쓰도록 지정하는 Launch Template
+resource "aws_launch_template" "node" {
+  name_prefix = "${var.project_name}-node-"
+
+  vpc_security_group_ids = [var.eks_nodes_sg_id]
+
+  tag_specifications {
+    resource_type = "instance"
+    tags = {
+      Name    = "${var.project_name}-node"
+      Project = var.project_name
+      Owner   = var.owner
+      Env     = var.env
+    }
   }
 }

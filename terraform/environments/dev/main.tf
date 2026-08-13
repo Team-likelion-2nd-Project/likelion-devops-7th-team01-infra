@@ -1,3 +1,8 @@
+data "aws_eks_cluster" "main" {
+  name = "team01-course-registration-eks"
+  depends_on = [module.eks]
+}
+
 terraform {
   required_version = ">= 1.5.0"
   required_providers {
@@ -110,6 +115,7 @@ module "eks" {
   env          = "dev"
   private_subnet_ids  = module.vpc.private_subnet_ids
   node_group_role_arn = module.iam.eks_node_group_role_arn
+  eks_nodes_sg_id      = module.security_group.eks_nodes_sg_id
 }
 
 module "cognito" {
@@ -198,4 +204,14 @@ resource "aws_security_group_rule" "rds_from_eks_cluster_sg" {
   security_group_id        = module.security_group.rds_sg_id
   source_security_group_id = "sg-08535928bf04e73ad"
   description               = "Allow MySQL from actual EKS cluster security group"
+}
+
+resource "aws_security_group_rule" "cluster_sg_from_nodes" {
+  type                     = "ingress"
+  from_port                = 443
+  to_port                  = 443
+  protocol                 = "tcp"
+  security_group_id        = data.aws_eks_cluster.main.vpc_config[0].cluster_security_group_id
+  source_security_group_id = module.security_group.eks_nodes_sg_id
+  description               = "Allow nodes to reach EKS control plane API"
 }
