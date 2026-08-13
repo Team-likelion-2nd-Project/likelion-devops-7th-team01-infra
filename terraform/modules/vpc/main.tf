@@ -24,10 +24,12 @@ resource "aws_subnet" "public" {
   map_public_ip_on_launch = true
 
   tags = {
-    Name    = "${var.project_name}-public-${each.key}"
-    Project = var.project_name
-    Owner   = var.owner
-    Env     = var.env
+    Name                     = "${var.project_name}-public-${each.key}"
+    Project                  = var.project_name
+    Owner                    = var.owner
+    Env                      = var.env
+    "kubernetes.io/role/elb" = "1"
+    "kubernetes.io/cluster/${var.project_name}-eks" = "shared"
   }
 }
 

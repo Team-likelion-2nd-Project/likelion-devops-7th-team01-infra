@@ -39,6 +39,14 @@ resource "aws_security_group" "eks_nodes" {
     security_groups = [data.aws_eks_cluster.main.vpc_config[0].cluster_security_group_id]
   }
 
+  ingress {
+  description     = "Allow control plane to reach ALB controller webhook"
+  from_port       = 9443
+  to_port         = 9443
+  protocol        = "tcp"
+  security_groups = [data.aws_eks_cluster.main.vpc_config[0].cluster_security_group_id]
+}
+
   egress {
     description = "Allow all outbound traffic"
     from_port   = 0
