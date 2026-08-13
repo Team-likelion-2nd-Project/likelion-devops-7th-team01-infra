@@ -179,7 +179,7 @@ resource "kubernetes_secret" "backend_rds" {
     DB_HOST     = split(":", module.rds.db_endpoint)[0]
     DB_PORT     = "3306"
     DB_NAME     = module.rds.db_name
-    DB_USERNAME = "admin"
+    DB_USER = "admin"
     DB_PASSWORD = jsondecode(data.aws_secretsmanager_secret_version.rds_master.secret_string)["password"]
   }
 
@@ -188,4 +188,14 @@ resource "kubernetes_secret" "backend_rds" {
 
 data "aws_secretsmanager_secret_version" "rds_master" {
   secret_id = module.rds.master_user_secret_arn
+}
+
+module "backend_secrets" {
+  source = "../../modules/backend-secrets"
+
+  project_name   = var.project_name
+  owner          = var.owner
+  env            = "dev"
+  cluster_name   = module.eks.cluster_name
+  rds_secret_arn = module.rds.master_user_secret_arn
 }
