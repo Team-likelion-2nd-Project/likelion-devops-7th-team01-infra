@@ -40,6 +40,14 @@ resource "aws_security_group" "eks_nodes" {
   }
 
   ingress {
+    description     = "Allow control plane to reach metrics-server"
+    from_port       = 10251
+    to_port         = 10251
+    protocol        = "tcp"
+    security_groups = [data.aws_eks_cluster.main.vpc_config[0].cluster_security_group_id]
+  }
+
+  ingress {
   description     = "Allow control plane to reach ALB controller webhook"
   from_port       = 9443
   to_port         = 9443
