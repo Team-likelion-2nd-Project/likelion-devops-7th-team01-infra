@@ -24,6 +24,14 @@ resource "aws_cloudfront_origin_access_control" "frontend" {
   signing_protocol                  = "sigv4"
 }
 
+resource "aws_cloudfront_function" "spa_routing" {
+  name    = "${var.project_name}-spa-routing"
+  runtime = "cloudfront-js-2.0"
+  comment = "SPA client-side routing - 확장자 없는 경로만 index.html로 리라이트 (API 응답은 건드리지 않음)"
+  publish = true
+  code    = file("${path.module}/spa-routing.js")
+}
+
 resource "aws_cloudfront_distribution" "frontend" {
   enabled             = true
   default_root_object = "index.html"
@@ -35,6 +43,18 @@ resource "aws_cloudfront_distribution" "frontend" {
     origin_access_control_id = aws_cloudfront_origin_access_control.frontend.id
   }
 
+  origin {
+    domain_name = "k8s-default-backendi-89c25e9e8b-1992645647.ap-northeast-3.elb.amazonaws.com"
+    origin_id   = "ALB-backend"
+
+    custom_origin_config {
+      http_port              = 80
+      https_port              = 443
+      origin_protocol_policy  = "http-only"
+      origin_ssl_protocols    = ["TLSv1.2"]
+    }
+  }
+
   default_cache_behavior {
     allowed_methods        = ["GET", "HEAD"]
     cached_methods          = ["GET", "HEAD"]
@@ -43,6 +63,27 @@ resource "aws_cloudfront_distribution" "frontend" {
 
     forwarded_values {
       query_string = false
+      cookies {
+        forward = "none"
+      }
+    }
+
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.spa_routing.arn
+    }
+  }
+
+  ordered_cache_behavior {
+    path_pattern            = "/api/*"
+    allowed_methods         = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
+    cached_methods           = ["GET", "HEAD"]
+    target_origin_id         = "ALB-backend"
+    viewer_protocol_policy   = "https-only"
+
+    forwarded_values {
+      query_string = true
+      headers      = ["Authorization", "Content-Type"]
       cookies {
         forward = "none"
       }

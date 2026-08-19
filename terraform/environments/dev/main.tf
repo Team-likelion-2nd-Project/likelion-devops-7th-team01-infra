@@ -196,15 +196,6 @@ data "aws_secretsmanager_secret_version" "rds_master" {
   secret_id = module.rds.master_user_secret_arn
 }
 
-resource "aws_security_group_rule" "rds_from_eks_cluster_sg" { 
-  type                     = "ingress"
-  from_port                = 3306
-  to_port                  = 3306
-  protocol                 = "tcp"
-  security_group_id        = module.security_group.rds_sg_id
-  source_security_group_id = "sg-08535928bf04e73ad"
-  description               = "Allow MySQL from actual EKS cluster security group"
-}
 
 resource "aws_security_group_rule" "cluster_sg_from_nodes" {
   type                     = "ingress"
@@ -212,6 +203,9 @@ resource "aws_security_group_rule" "cluster_sg_from_nodes" {
   to_port                  = 443
   protocol                 = "tcp"
   security_group_id        = data.aws_eks_cluster.main.vpc_config[0].cluster_security_group_id
+  lifecycle {
+    ignore_changes = [security_group_id]
+  }
   source_security_group_id = module.security_group.eks_nodes_sg_id
   description               = "Allow nodes to reach EKS control plane API"
 }
